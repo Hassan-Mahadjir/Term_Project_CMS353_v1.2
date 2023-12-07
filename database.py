@@ -77,7 +77,7 @@ class Announcement(db.Model):
 instructor=Instructor(inst_id=2,inst_name='Nada',inst_password='Kollah',inst_email='nada@gmail.com',admin_id=1)
 instructor=Instructor(inst_id=3,inst_name='Alex',inst_password='russian',inst_email='alex@gmail.com',admin_id=1)
 
-student=Student(std_id=1,std_name='Ahmed',std_password='xyz',std_email='ahmed@gmail.com',instructor_id=1)
+student=Student(std_id=1,std_name='Ahmed',std_password='xyz',std_email='ahmed@gmail.com')
 student2=Student(std_id=2,std_name='hasan',std_password='zyx',std_email='hasan@gmail.com',instructor_id=2)
 student3=Student(std_id=3,std_name='nada',std_password='xzy',std_email='n@gmail.com',instructor_id=2)
 
@@ -97,6 +97,5 @@ student=Student(std_id=4,std_name='Athony',std_password='xxx',std_email='anthony
 
 
 with app.app_context():
-    db.session.add(student)
-    student.teaching.append(instructor)
+    group.grouping.append(student)
     db.session.commit()
