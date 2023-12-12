@@ -51,17 +51,28 @@ def home_student():
 @admin_only
 def register():
     if request.method == "POST":
-        result = {"firstName": request.form['firstName'],
-                  "lastName": request.form['lastName'],
-                  "userName": request.form['userName'],
-                  "email": request.form["email"],
-                  "password": request.form["password"],
-                  "type": request.form['type']}
-        print(result)
+        name=request.form['firstName']+" "+request.form['lastName']
+        id=int(request.form["id"])
+        email= request.form["email"].lower()
+        password= request.form["password"]
+        type=request.form['type'].lower()
+        if type== 'student':
+            student=Student(std_id=id,std_name=name,std_password=password,std_email=email)
+            db.session.add(student)
+            db.session.commit()
+        elif type=='instructor':
+            instructor=Instructor(inst_id=id,inst_name=name,inst_password=password,inst_email=email,admin_id=1)
+            db.session.add(instructor)
+            db.session.commit()
+        else:
+            print("Invalid user type")
+        return redirect(url_for('admin'))
 
-        return redirect(url_for('home'))
+   
 
     return render_template('addForm.html')
+
+
 
 
 @app.route('/signin', methods=['POST', 'GET'])
@@ -91,9 +102,17 @@ def logout():
 
 @app.route('/admin')
 def admin():
-    users = db.session.execute(db.select(Student)).scalars().all()
-    print(users[0].std_email)
-    return render_template('admin_page.html', users= users)
+    students = db.session.execute(db.select(Student)).scalars().all()
+    instructors = db.session.execute(db.select(Instructor)).scalars().all()
+    users= [instructors, students]
+
+    for t in users:
+        if t[0]:
+            for user in t:
+                print(user)
+
+
+    return render_template('admin_page.html', users= [instructors, students])
 
 
 @app.route('/group')
@@ -102,3 +121,5 @@ def group():
 
 if __name__ == '__main__':
     app.run(debug=True)
+
+
