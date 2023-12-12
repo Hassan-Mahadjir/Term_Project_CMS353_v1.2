@@ -1,0 +1,56 @@
+   # admin=Admin(ad_id='1',ad_name='Nour',ad_password='barakat',ad_email='nour@gmail.com')
+# instructor=Instructor(inst_id=1,inst_name='Nada',inst_password='Kollah',inst_email='nada@gmail.com',admin_id=1)
+# instructor1=Instructor(inst_id=2,inst_name='Alex',inst_password='russian',inst_email='alex@gmail.com',admin_id=1)
+# instructor2=Instructor(inst_id=3,inst_name='Hadi',inst_password='isik',inst_email='hadi@gmail.com',admin_id=1)
+
+
+student=Student(std_id=1,std_name='Ahmed',std_password='xyz',std_email='ahmed@gmail.com')
+student2=Student(std_id=2,std_name='Hassan',std_password='zyx',std_email='hassan@gmail.com')
+student3=Student(std_id=3,std_name='Nada',std_password='xzy',std_email='nada@gmail.com')
+student4=Student(std_id=5,std_name='Aya',std_password='xzy',std_email='aya@gmail.com')
+
+
+group=Group(grp_id=1,grp_name='CMSE353',instructor_id=1)
+group1=Group(grp_id=2,grp_name='CMSE354',instructor_id=2)
+group2=Group(grp_id=3,grp_name='CMSE473',instructor_id=1)
+
+channel=Channel(ch_id=1,ch_name='General',group_id=2)
+channel1=Channel(ch_id=2,ch_name='Lab',group_id=2)
+channel2=Channel(ch_id=3,ch_name='Tutorial',group_id=1)
+   
+   
+    # group.grouping.append(student)
+    # insturctor = db.session.execute(db.select(Instructor).where(Instructor.inst_id == 2)).scalar()
+    student1 = db.session.execute(db.select(Student).where(Student.std_id == 1)).scalar()
+    student2 = db.session.execute(db.select(Student).where(Student.std_id == 2)).scalar()
+    student3 = db.session.execute(db.select(Student).where(Student.std_id == 3)).scalar()
+    student4 = db.session.execute(db.select(Student).where(Student.std_id == 4)).scalar()
+    student5 = db.session.execute(db.select(Student).where(Student.std_id == 5)).scalar()
+
+
+    # student.teaching.append(insturctor)
+
+    db.session.add_all([group,group1,group2])
+    group.grouping.append(student1)
+    group1.grouping.append(student2)
+    group2.grouping.append(student3)
+    group.grouping.append(student4)
+    group.grouping.append(student3)
+    group1.grouping.append(student5)
+    db.session.commit()
+
+
+    student1 = db.session.execute(db.select(Student).where(Student.std_id == 1)).scalar()
+
+    announcement= Announcement(ann_id=1,ann_title='Term Project',ann_body='Hello world',instructor_id=1)
+announcement1= Announcement(ann_id=2,ann_title='Term Project2',ann_body='Hello ',instructor_id=1)
+announcement2= Announcement(ann_id=3,ann_title='Term Project3',ann_body='Hi',instructor_id=2)
+
+
+how to get many-to-many data
+    instructor = db.session.execute(db.select(Instructor).where(Instructor.inst_id == 1)).scalar()
+    print(instructor.admin_id)
+
+    st = db.session.execute(db.select(Student).where(Student.std_id == 3)).scalar()
+    print(st.teaching[0].inst_name)
+    db.session.commit()
