@@ -18,9 +18,9 @@
     <header>
         <div class="up-header">
             <div class="d-flex flex-column flex-md-row align-items-center ">
-                <button class="btn btn-primary mx-3 my-2"><</button>
+                <button class="btn btn-primary mx-3 my-2" style="color: white; background-color: rgb(22, 45, 255);"><</button>
                 <nav class="d-inline-flex mt-2 mt-md-0 ms-md-auto">
-                <button type="button" class="btn btn-light mx-3 my-2">Add Channel</button>
+                <button type="button" class="btn btn-light mx-3 my-2" >Add Channel</button>
                 </nav>
                
             </div>
@@ -40,6 +40,8 @@
                         <button class="btn btn-primary active mb-2">General</button>
                         <button class="btn btn-primary active mb-2">Lab</button>
                     </ul>
+                    <a class="nav-link" href="{{url_for('logout')}}"><button class="btn btn rounded-pill px-3 w-20 btn-sm" style="background-image: linear-gradient(rgb(0, 1, 70), rgb(0, 51, 145)); color:white" type="button">Log-out</button></a>
+
                 </div>
                 <div class="col-9 d-flex flex-column " style="height: 95vh; padding: 0;"> <!-- Added padding: 0; to remove the space between the right side and the left side and the window -->
                     <div class="d-flex align-items-center justify-content-between  p-3 bg-light">
@@ -57,7 +59,7 @@
                     <!-- Add announcement button and input -->
                     <div class="d-flex align-items-center justify-content-center bg-light p-3" style="margin-bottom:20px ;"> <!-- This div will be at the bottom of the flex container -->
                         <input type="text" class="form-control mr-3" placeholder="Enter announcement text here">
-                        <button class="btn btn-primary" style="margin-left: 10px;">></button>
+                        <button class="btn btn-primary" style="margin-left: 10px; color: white; background-color: rgb(22, 45, 255);">></button>
                     </div>
                 </div>
             </div>

@@ -17,7 +17,7 @@ body {
     height: 3.5rem;
     width: 100%;
     margin-top: 0;
-    background-color: #1F408D;
+    background-image: linear-gradient(rgb(0, 1, 70), rgb(0, 51, 145));
 }
 
 button {

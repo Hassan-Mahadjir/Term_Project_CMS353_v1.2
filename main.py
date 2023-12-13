@@ -1,58 +1,118 @@
-from flask import Flask, render_template, request, redirect, url_for
+from flask import Flask, render_template, request, redirect, url_for, abort
+from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy import Column, Integer, String
+from database import *
+from flask_login import login_user, LoginManager, current_user, logout_user
+from functools import wraps
+
+
+
 
 app = Flask(__name__)
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///TeamsDataBase.db'
+app.config['SECRET_KEY'] = '8BYkEfBA6O6donzWlSihBXox7C0sKR6b'
 
-static = {"firstName": "name",
-            "lastName": "lastname",
-            "userName": "userName",
-            "email": "email@at.com",
-            "password": "password",
-            "type": "type"
-            }
+db = SQLAlchemy()
+db.init_app(app)
+
+# Configure Flask-Login
+login_manager = LoginManager()
+login_manager.init_app(app)
+
+@login_manager.user_loader
+def load_user(user_id):
+    return db.get_or_404(Admin, user_id)
+
+with app.app_context():
+    db.create_all()
+
+
+def admin_only(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        # If id is not 1 then return abort with 403 error
+        if current_user.ad_id != 1:
+            return abort(403)
+        # Otherwise continue with the route function
+        return f(*args, **kwargs)
+
+    return decorated_function
+
 
 @app.route('/')
 def home():
-    return render_template("instructor_page.html")
+    return redirect(url_for('signin'))
 
 @app.route('/home_student')
 def home_student():
     return render_template("student_page.html")
 
 @app.route('/register', methods=['POST', 'GET'])
+@admin_only
 def register():
     if request.method == "POST":
-        result = {"firstName": request.form['firstName'],
-                  "lastName": request.form['lastName'],
-                  "userName": request.form['userName'],
-                  "email": request.form["email"],
-                  "password": request.form["password"],
-                  "type": request.form['type']}
-        print(result)
+        name=request.form['firstName']+" "+request.form['lastName']
+        id=int(request.form["id"])
+        email= request.form["email"].lower()
+        password= request.form["password"]
+        type=request.form['type'].lower()
+        if type== 'student':
+            student=Student(std_id=id,std_name=name,std_password=password,std_email=email)
+            db.session.add(student)
+            db.session.commit()
+        elif type=='instructor':
+            instructor=Instructor(inst_id=id,inst_name=name,inst_password=password,inst_email=email,admin_id=1)
+            db.session.add(instructor)
+            db.session.commit()
+        else:
+            print("Invalid user type")
+        return redirect(url_for('admin'))
 
-        return redirect(url_for('home'))
+   
 
     return render_template('addForm.html')
+
+
+
 
 @app.route('/signin', methods=['POST', 'GET'])
 def signin():
 
     if request.method == "POST":
+        email = request.form['email']
+        password = request.form['password']
+        
+        admin = db.session.execute(db.select(Admin).where(Admin.ad_id == 1)).scalar()
 
-        result1 = {"email": request.form["email"],
-                  "password": request.form['password']}
+        if email == admin.ad_email and password == admin.ad_password:
 
-        if result1["email"] == static["email"] and result1["password"] == static["password"]:
-            return redirect(url_for('home_student'))
+            login_user(admin)
+
+            return redirect(url_for("admin"))
         else:
-            return render_template('signin.html')
+            return redirect(url_for("signin"))
 
     return render_template('signin.html')
+
+@app.route('/logout')
+def logout():
+    logout_user()
+    print("logout done")
+    return redirect(url_for('signin'))
+
+@app.route('/admin')
+def admin():
+    students = db.session.execute(db.select(Student)).scalars().all()
+    instructors = db.session.execute(db.select(Instructor)).scalars().all()
+
+    return render_template('admin_page.html', types= [instructors, students])
 
 
 @app.route('/group')
 def group():
     return redirect(url_for('home'))
 
-
 if __name__ == '__main__':
     app.run(debug=True)
+
+
