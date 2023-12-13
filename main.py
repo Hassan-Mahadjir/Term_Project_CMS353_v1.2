@@ -104,15 +104,8 @@ def logout():
 def admin():
     students = db.session.execute(db.select(Student)).scalars().all()
     instructors = db.session.execute(db.select(Instructor)).scalars().all()
-    users= [instructors, students]
 
-    for t in users:
-        if t[0]:
-            for user in t:
-                print(user)
-
-
-    return render_template('admin_page.html', users= [instructors, students])
+    return render_template('admin_page.html', types= [instructors, students])
 
 
 @app.route('/group')

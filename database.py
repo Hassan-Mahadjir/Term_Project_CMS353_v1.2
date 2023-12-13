@@ -79,12 +79,4 @@ with app.app_context():
     students = db.session.execute(db.select(Student)).scalars().all()
     instructors = db.session.execute(db.select(Instructor)).scalars().all()
 
-
     # db.session.commit()
-
-users= [instructors, students]
-
-for type in users:
-    if type == type[0]:
-        for user in type:
-             print(user)
