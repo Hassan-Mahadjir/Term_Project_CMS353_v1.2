@@ -5,7 +5,7 @@ from datetime import datetime
 from flask_login import UserMixin
 
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///TeamsDataBase.db'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///SystemDataBase.db'
 
 db = SQLAlchemy()
 db.init_app(app)
@@ -26,10 +26,16 @@ class Admin(UserMixin, db.Model):
     ad_name = db.Column(db.String(50), nullable=False)
     ad_email = db.Column(db.String(), nullable=False)
     ad_password = db.Column(db.String(), nullable=False)
+    type=db.Column(db.String(30),default='admin')
+
     instructors = db.relationship('Instructor', backref='Admin')
 
     def get_id(self):
            return (self.ad_id)
+    
+    def __init__(self, user_type, user_object):
+        self.user_type = user_type
+        self.user_object = user_object
 
 class Instructor(UserMixin, db.Model):
     inst_id = db.Column(db.Integer, primary_key=True)
@@ -37,9 +43,19 @@ class Instructor(UserMixin, db.Model):
     inst_email = db.Column(db.String(), nullable=False)
     inst_password = db.Column(db.String(), nullable=False)
     admin_id = db.Column(db.Integer, db.ForeignKey('admin.ad_id'))
+    type=db.Column(db.String(30),default='instructor')
+
+
+    def __init__(self, user_type, user_object):
+        self.user_type = user_type
+        self.user_object = user_object
+
 
     groups = db.relationship('Group', backref='Instructor')
     announcements = db.relationship('Announcement', backref='Instructor')
+
+    def get_id(self):
+        return (self.inst_id)
 
 
 class Student(UserMixin, db.Model):
@@ -47,7 +63,18 @@ class Student(UserMixin, db.Model):
     std_name = db.Column(db.String(50), nullable=False)
     std_email = db.Column(db.String(), nullable=False)
     std_password = db.Column(db.String(), nullable=False)
+    type=db.Column(db.String(30),default='student')
     teaching=db.relationship('Instructor',secondary=student_instructor, backref='teachers')
+
+
+    def __init__(self, user_type, user_object):
+        self.user_type = user_type
+        self.user_object = user_object
+    
+
+
+    def get_id(self):
+        return (self.std_id)
 
 
 
@@ -77,6 +104,17 @@ class Announcement(db.Model):
 
 with app.app_context():
     students = db.session.execute(db.select(Student)).scalars().all()
-    instructors = db.session.execute(db.select(Instructor)).scalars().all()
+    # instructors = db.session.execute(db.select(Instructor)).scalars().all()
+    # admin=Admin(ad_id='1',ad_name='Nour',ad_password='barakat',ad_email='nour@gmail.com')
+    # instructor=Instructor(inst_id=1,inst_name='Nada',inst_password='Kollah',inst_email='nada@gmail.com',admin_id=1)
+    # instructor1=Instructor(inst_id=2,inst_name='Alex',inst_password='russian',inst_email='alex@gmail.com',admin_id=1)
+    # instructor2=Instructor(inst_id=3,inst_name='Hadi',inst_password='isik',inst_email='hadi@gmail.com',admin_id=1)
 
+    # student=Student(std_id=1,std_name='Ahmed',std_password='xyz',std_email='ahmed@gmail.com')
+    # student2=Student(std_id=2,std_name='Hassan',std_password='zyx',std_email='hassan@gmail.com')
+    # student3=Student(std_id=3,std_name='Nada',std_password='xzy',std_email='nada@gmail.com')
+    # student4=Student(std_id=5,std_name='Aya',std_password='xzy',std_email='aya@gmail.com')
+
+    # db.session.add_all([admin,instructor,instructor1,instructor2,student,student2,student3,student4])
+    # db.session.commit()
     # db.session.commit()

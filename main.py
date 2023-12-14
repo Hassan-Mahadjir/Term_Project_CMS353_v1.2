@@ -9,7 +9,7 @@ from functools import wraps
 
 
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///TeamsDataBase.db'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///SystemDataBase.db'
 app.config['SECRET_KEY'] = '8BYkEfBA6O6donzWlSihBXox7C0sKR6b'
 
 db = SQLAlchemy()
@@ -21,7 +21,22 @@ login_manager.init_app(app)
 
 @login_manager.user_loader
 def load_user(user_id):
-    return db.get_or_404(Admin, user_id)
+
+    student = db.session.query(Student).get(user_id)
+    if student:
+        return Student(user_type='student', user_object=student)
+    
+    instructor = db.session.query(Instructor).get(user_id)
+    if instructor:
+        return Instructor(user_type='instructor', user_object=instructor)
+    
+    admin = db.session.query(Admin).get(user_id)
+    if admin:
+        return Admin(user_type='admin', user_object=admin)
+    
+    return None
+
+
 
 with app.app_context():
     db.create_all()
@@ -79,18 +94,45 @@ def signin():
     if request.method == "POST":
         email = request.form['email']
         password = request.form['password']
+        user_type = request.form['user_type']
+
+        if user_type == 'Admin':
+
+            admin = db.session.execute(db.select(Admin).where(Admin.ad_id == 1)).scalar()
+
+            if email == admin.ad_email and password == admin.ad_password:
+
+                login_user(admin)
+
+                return redirect(url_for("admin"))
+            else:
+                return redirect(url_for("signin"))
+        elif user_type == 'Instructor':
+            instructor = db.session.execute(db.select(Instructor).where(Instructor.inst_email == email)).scalar()
+
+            if email == instructor.inst_email and password == instructor.inst_password:
+
+                login_user(instructor)
+
+                return render_template('instructor_page.html')
+            else:
+                return redirect(url_for("signin"))
+            
+        elif user_type == 'Student':
+            student = db.session.execute(db.select(Student).where(Student.std_email == email)).scalar()
+
+            if email == student.std_email and password == student.std_password:
+
+                login_user(student)
+
+                return render_template('student_mainpage.html')
+            else:
+                return redirect(url_for("signin"))
         
-        admin = db.session.execute(db.select(Admin).where(Admin.ad_id == 1)).scalar()
 
-        if email == admin.ad_email and password == admin.ad_password:
-
-            login_user(admin)
-
-            return redirect(url_for("admin"))
-        else:
-            return redirect(url_for("signin"))
 
     return render_template('signin.html')
+
 
 @app.route('/logout')
 def logout():

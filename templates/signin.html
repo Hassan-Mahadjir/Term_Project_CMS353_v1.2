@@ -24,7 +24,18 @@
         <form method="post">
           <div class="text-center"><img class=" mb-4"  src="../static/assets/login_picture.jpeg"  alt="" width="400" height="400"></div>
           <h1 class="h1 mb-3 fw-normal text-center">Please sign in</h1>
-      
+          
+          <div class="mb-3">
+            <label  for="user_type" class="form-label">User type</label>
+            <select name="user_type" class="form-select" id="user_type" required="">
+              <option value="">Choose...</option>
+              <option>Student</option>
+              <option>Instructor</option>
+              <option>Admin</option>
+
+            </select>
+          </div>
+
           <div class="form-floating">
             
             <input name="email" type="email" class="form-control" id="email" placeholder="name@example.com" data-nlok-ref-guid="5cb72981-ca57-464a-c217-b96e5170339b" autocomplete="off"><div id="norton-idsafe-field-styling-divId" style="height:24px;max-width:24px;vertical-align:top; position:absolute; top:17px;left:266.3225806451613px;cursor:pointer;resize: both;z-index:2147483646;"></div>
