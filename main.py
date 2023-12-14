@@ -68,8 +68,6 @@ def register():
             print("Invalid user type")
         return redirect(url_for('admin'))
 
-   
-
     return render_template('addForm.html')
 
 
@@ -107,6 +105,46 @@ def admin():
 
     return render_template('admin_page.html', types= [instructors, students])
 
+@admin_only
+@app.route('/edit/<type>/<int:id>/<name>/<email>', methods=['POST', 'GET'])
+def edit(type,id,name,email):
+
+    edit_user = {
+        'name':name,
+        'id':id,
+        'email':email,
+    }
+
+    if request.method == "POST":
+        email = request.form['email']
+        id_ = request.form['id']
+        fullname=request.form['fullName']
+        updated_type=request.form['type']
+
+        if updated_type == 'Student' and type == 'instructor':
+            instructor_data = db.session.execute(db.select(Instructor).where(Instructor.inst_id == id_)).scalar()
+            db.session.delete(instructor_data)
+            db.session.commit()
+            new_student=Student(std_name=fullname,std_password='xyz',std_email=email)
+            db.session.add(new_student)
+            db.session.commit()
+    
+        elif updated_type == 'Instructor' and type == 'student':
+
+            student_data = db.session.execute(db.select(Student).where(Student.std_id == id_)).scalar()
+            db.session.delete(student_data)
+            db.session.commit()
+            new_instructor=Instructor(inst_name=fullname,inst_password='xyz',inst_email=email,admin_id = 1)
+            db.session.add(new_instructor)
+            db.session.commit()
+
+
+        return redirect(url_for('admin'))
+
+
+    return render_template('edituser.html', user = edit_user)
+
+    
 
 @app.route('/group')
 def group():

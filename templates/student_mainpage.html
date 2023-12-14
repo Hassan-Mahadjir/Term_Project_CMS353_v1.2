@@ -14,11 +14,24 @@
       crossorigin="anonymous"
     ></script>
     <link rel="stylesheet" href="../static/css/Instructor.css" />
-    <title>Student Page</title>
+    <title>Student Main-Page</title>
   </head>
   <body>
     <header>
-      <div class="up-header mb-3"></div>
+      <nav class="navbar navbar-expand-lg fixed-top navbar-dark" style="background-image: linear-gradient(rgb(0, 1, 70), rgb(0, 51, 145));" aria-label="Main navigation">
+        <div class="container-fluid">
+            <div class="navbar-collapse navbar-collapse " id="navbarsExampleDefault">
+                <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+                  
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{url_for('logout')}}"><button class="btn btn-outline-success rounded-pill px-3 w-20 btn-sm" style="color: white; border-color: white;" type="button">Log-out</button></a>
+                    </li>
+
+                </ul>
+            </div>
+        </div>
+    </nav>
+    
       <div
         class="d-flex flex-column flex-md-row align-items-center pb-3 mb-4 ps-5 pe-4"
       >

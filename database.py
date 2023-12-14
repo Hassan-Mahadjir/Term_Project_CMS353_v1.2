@@ -31,7 +31,7 @@ class Admin(UserMixin, db.Model):
     def get_id(self):
            return (self.ad_id)
 
-class Instructor(db.Model):
+class Instructor(UserMixin, db.Model):
     inst_id = db.Column(db.Integer, primary_key=True)
     inst_name = db.Column(db.String(50), nullable=False)
     inst_email = db.Column(db.String(), nullable=False)
@@ -42,7 +42,7 @@ class Instructor(db.Model):
     announcements = db.relationship('Announcement', backref='Instructor')
 
 
-class Student(db.Model):
+class Student(UserMixin, db.Model):
     std_id = db.Column(db.Integer, primary_key=True)
     std_name = db.Column(db.String(50), nullable=False)
     std_email = db.Column(db.String(), nullable=False)
