@@ -4,6 +4,7 @@ from sqlalchemy import Column, Integer, String
 from database import *
 from flask_login import login_user, LoginManager, current_user, logout_user
 from functools import wraps
+import random
 
 
 
@@ -72,6 +73,11 @@ def home():
 def home_student():
     return render_template("student_page.html")
 
+@app.route('/home_instructor')
+def home_instructor():
+    groups = db.session.execute(db.select(Group)).scalars().all()
+    return render_template("instructor_page.html", type= [groups])
+
 @app.route('/register', methods=['POST', 'GET'])
 @admin_only
 def register():
@@ -124,7 +130,7 @@ def signin():
 
                 login_user(instructor)
 
-                return render_template('instructor_page.html')
+                return redirect(url_for("home_instructor"))
             else:
                 return redirect(url_for("signin"))
             
@@ -196,11 +202,52 @@ def edit(type,id,name,email):
 
     return render_template('edituser.html', user = edit_user)
 
-    
 
-@app.route('/group')
-def group():
-    return redirect(url_for('home'))
+@app.route('/create_group', methods=['POST', 'GET']) 
+@instructor_only
+def create_group():
+      if request.method == "POST":
+        groupname= request.form['groupname']
+        addchannel= request.form['addchannel']
+        gen_grp_id= random.randint(1,100000)
+        group=Group(grp_id=gen_grp_id,grp_name=groupname,instructor_id=1)
+        db.session.add(group)
+        db.session.commit()
+        general=Channel(ch_id=random.randint(1,100000),ch_name="General",group_id=gen_grp_id)
+        channel=Channel(ch_id=random.randint(1,100000),ch_name=addchannel,group_id=gen_grp_id)
+        db.session.add(general)
+        db.session.add(channel)
+        db.session.commit()
+        return redirect(url_for('home_instructor'))
+      return render_template('create_group_instructor.html')
+
+
+@app.route('/group_instructor/<name>', methods=['POST', 'GET'])
+@instructor_only
+def group_instructor(name):
+    groups = db.session.execute(db.select(Group)).scalars().all()
+    channels = db.session.execute(db.select(Channel)).scalars().all()
+
+    for group in groups:
+        if name==group.grp_name:
+            grp1_id=group.grp_id
+
+    if request.method == "POST":
+        print("hello")
+        channel_name= request.form['add_channel']
+        add_channel=Channel(ch_id=random.randint(1,100000),ch_name=channel_name,group_id=grp1_id)
+        db.session.add(add_channel)
+        db.session.commit()
+        return redirect(request.url)
+
+    return render_template('instructor_group_page.html', group_name=name, group_id=grp1_id, type= [channels])
+
+@app.route('/add_student', methods=['POST', 'GET'])
+@instructor_only
+def add_student():
+    students = db.session.execute(db.select(Student)).scalars().all()
+    return render_template('add_student_instructor.html', type=[students])
+
 
 if __name__ == '__main__':
     app.run(debug=True)

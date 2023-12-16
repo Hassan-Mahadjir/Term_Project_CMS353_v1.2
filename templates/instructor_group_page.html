@@ -19,7 +19,7 @@
         <div class="up-header">
             <div class="d-flex flex-column flex-md-row align-items-center ">
                 <nav class="d-inline-flex mt-2 mt-md-0 ms-md-auto">
-                <button type="button" class="btn btn-light mx-3 my-2">Add Student</button>
+                    <a class="nav-link" href="{{url_for('add_student')}}"><button type="button"  class="btn btn-light mx-3 my-2">Add Student</button></a>
                 </nav>
                
             </div>
@@ -32,19 +32,27 @@
                     <div class="container text-center">
                         <div class="row align-items-start">
                             <div class="d-flex" style="height: 10vh;"> </div>
-                            <div class="text-center mb-3" ><img class=" mb-4"  src="../static/assets/book-icon1.png"  alt="" width="100" height="100"><h3 class="text-center py-3">Group name</h3> 
+                            <div class="text-center mb-3" ><img class=" mb-4"  src="../static/assets/book-icon1.png"  alt="" width="100" height="100"><h3 class="text-center py-3">{{group_name}}</h3> 
                             </div>
                             <hr>
                         </div>
                         <div class="row align-items-center">
                             <h5 class="text-center py-3 ">Channels</h5>
                             <ul class="list-group list-group-flush">
-                                <button class="btn btn-primary  mb-2">General</button>
-                                <button class="btn btn-primary  mb-2">Lab</button>
+                            {% for channels in type %}
+                                {% for channel in channels %}
+                                    {% if channel.group_id == group_id%}
+                                        <button class="btn btn-primary  mb-2">{{channel.ch_name}}</button>
+                                    {%endif%}
+                                {%endfor%}
+                            {%endfor%}  
+                            </ul>
+                            <ul class="list-group list-group-flush">
+                                    <button  class="btn btn-primary" ><form method="post"><input name="add_channel" type="text" class="form-control" id="add_channel" placeholder="Enter channel name to add"></form></button>
                             </ul>
                         </div>
                     </div>
-                    <a class="nav-link" href="{{url_for('logout')}}"></a><button class="btn btn rounded-pill px-3 w-20 btn-sm" style="position: fixed; bottom: 20px; background-image: linear-gradient(rgb(0, 1, 70), rgb(0, 51, 145)); color:white">Sign out</button></a>
+                    <a class="nav-link" href="{{url_for('logout')}}"><button class="btn btn rounded-pill px-3 w-20 btn-sm" style="position: fixed; bottom: 20px; background-image: linear-gradient(rgb(0, 1, 70), rgb(0, 51, 145)); color:white">Sign out</button></a>
                 </div>
                 <div class="col-9 d-flex flex-column " style="height: 95vh; padding: 0;"> <!-- Added padding: 0; to remove the space between the right side and the left side and the window -->
                     <div class="d-flex align-items-center justify-content-between  p-3 bg-light">
