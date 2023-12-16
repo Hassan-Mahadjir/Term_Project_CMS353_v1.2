@@ -17,7 +17,7 @@
     
     <div class="up-header mb-3">
       <div class="d-flex flex-column flex-md-row align-items-center">
-        <button class="btn btn-primary mx-3 my-1 mt-2" style="color: white; background-color: rgb(22, 45, 255);"><</button>
+        <a href="javascript:history.back()"><button class="btn btn-primary mx-3 my-1 mt-2" href="{{url_for('home_instructor')}}" style="color: white; background-color: rgb(22, 45, 255);"><</button></a>
         <nav class="d-inline-flex mt-2 mt-md-0 ms-md-auto">
 
         </nav>
@@ -35,11 +35,12 @@
     <div class=" container col-lg-8 ">
         <h4 class=" text-center mb-3">Create Group</h4>
 
-        <form class="needs-validation" novalidate="">
+        <form class="needs-validation" novalidate="" method="post">
           <div class="row g-3">
+
             <div class="col-sm-12">
               <label for="groupname" class="form-label">Group Name</label>
-              <input type="groupname" class="form-control" id="groupname" placeholder="" value="" required="">
+              <input name="groupname" class="form-control" id="groupname" placeholder="" value="" required="">
               <div class="invalid-feedback">
                 Valid first name is required.
               </div>
@@ -48,12 +49,8 @@
 
             <div class="col-sm-12">
               <label for="addchannel" class="form-label">Add Channel</label>
-              <input type="addchannel" class="form-control" id="addchannel" placeholder="" value="" required="">
+              <input name="addchannel" class="form-control" id="addchannel" placeholder="General channel added by default" value="" required="">
             </div>
-
-
-
-            
 
             <div class="text-center">
               <button class="w-50 btn btn-primary btn-lg mt-2 text-center" style="background-image: linear-gradient(rgb(0, 1, 70), rgb(0, 51, 145)); border-color: white;" type="submit">Submit</button>
