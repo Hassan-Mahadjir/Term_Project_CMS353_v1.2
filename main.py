@@ -261,25 +261,31 @@ def edit(type,id,name,email):
 def group(group_id):
     channels = db.session.execute(db.select(Channel).where(Channel.group_id == group_id)).scalars().all()
     print(channels)
-    return render_template('instructor_group_page.html', channels=channels)
+    return render_template('instructor_group_page.html', channels=channels, group_id = group_id)
 
 @app.route('/CreateGroup', methods=['POST', 'GET'])
 def create_group():
     if request.method == "POST":
-        print(current_user)
-        group_name = request.form['groupName']
-        channle_name= request.form["channleName"].lower()
+        try:
+            with app.app_context():
+                group_name = request.form['groupName']
+                channle_name = request.form["channleName"].lower()
 
-        group = Group(grp_name=group_name, instructor_id=current_user.inst_id)
-        db.session.add(group)
-        db.session.commit()
-        # channel = Channel(ch_name=channle_name, group_id=group.grp_id)
-        
-        # db.session.add(channel)
+                group = Group(grp_name=group_name, instructor_id=current_user.inst_id)
 
-        
+                db.session.add(group)
+                db.session.commit()
 
-        return redirect(url_for('instructor_group'))
+                channle = Channel(ch_name=channle_name, group_id = group.grp_id)
+                db.session.add(channle)
+                db.session.commit()
+
+                return redirect(url_for('instructor_group'))
+
+        except Exception as e:
+            # Handle exceptions appropriately
+            print(f"Error: {str(e)}")
+            db.session.rollback()
 
     return render_template('create_group_instructor.html')
 
@@ -290,7 +296,19 @@ def instructor_group():
 
 @app.route('/insturctorMain')
 def load_annoucement():
-    return redirect(url_for('instructor_group'))
+    return redirect(url_for('group'))
+
+@app.route('/addChannle/<id>', methods = ['POST','GET'])
+def addChannle(id):
+    if request.method == 'POST':
+        channle_name = request.form['channleName']
+        channle = Channel(ch_name=channle_name, group_id = id)
+        db.session.add(channle)
+        db.session.commit()
+
+        return redirect(url_for('instructor_group'))
+
+    return render_template('add_channel.html')
 
 if __name__ == '__main__':
     app.run(debug=True)

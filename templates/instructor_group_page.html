@@ -20,7 +20,7 @@
             <div class="d-flex flex-column flex-md-row align-items-center ">
                 <nav class="d-inline-flex mt-2 mt-md-0 ms-md-auto">
                 <button type="button" class="btn btn-light mx-3 my-2">Add Student</button>
-                <button type="button" class="btn btn-light mx-3 my-2">Add Channel</button>
+                <button type="button" class="btn btn-light mx-3 my-2"><a href="{{url_for('addChannle', id = group_id)}}" style="color: black; text-decoration: none;">Add Channel</a></button>
 
                 </nav>
                
@@ -42,7 +42,7 @@
                             <h5 class="text-center py-3 ">Channels</h5>
                             <ul class="list-group list-group-flush">
                                 {% for channel in channels%}
-                                <button class="btn btn-primary  mb-2"><a href="#" style="color: white; text-decoration: none;">{{channel.ch_name}}</a></button>
+                                <button class="btn btn-primary  mb-2"><a href="{{url_for('load_annoucement')}}" style="color: white; text-decoration: none;">{{channel.ch_name}}</a></button>
                                 {%endfor%}
                             </ul>
                         </div>
