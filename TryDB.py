@@ -75,8 +75,8 @@ class Announcement(db.Model):
 #      db.create_all()
 
 with app.app_context():
-        instructor_data = db.session.execute(db.select(Instructor).where(Instructor.inst_id == 1)).scalar()
-        db.session.delete(instructor_data)
-        db.session.commit()
+        student_data = db.session.execute(db.select(Student).where(Student.std_id == 5)).scalar()
+        print(student_data.teaching[0].inst_name)
+
 
     # db.session.commit()

@@ -6,7 +6,7 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
     <link rel="stylesheet" href="../static/css/Instructor.css">
-    <title>Admin Page</title>
+    <title>Group Channel</title>
     <style >
         body {
             overflow:hidden;
@@ -19,7 +19,6 @@
         <div class="up-header">
             <div class="d-flex flex-column flex-md-row align-items-center ">
                 <nav class="d-inline-flex mt-2 mt-md-0 ms-md-auto">
-                <button type="button" class="btn btn-light mx-3 my-2" >Add Channel</button>
                 </nav>
                
             </div>
@@ -45,7 +44,7 @@
                             </ul>
                         </div>
                     </div>
-                    <a class="nav-link" href="{{url_for('logout')}}"></a><button class="btn btn rounded-pill px-3 w-20 btn-sm" style="position: fixed; bottom: 20px; background-image: linear-gradient(rgb(0, 1, 70), rgb(0, 51, 145)); color:white">Sign out</button></a>
+                    <a class="nav-link" href="{{url_for('logout')}}"></a><button class="btn btn-outline-success rounded-pill px-3 w-20 btn-sm" style="position: fixed; bottom: 20px; color: red; border-color: red;">Log out</button></a>
                 </div>
                 <div class="col-9 d-flex flex-column " style="height: 95vh; padding: 0;"> <!-- Added padding: 0; to remove the space between the right side and the left side and the window -->
                     <div class="d-flex align-items-center justify-content-between  p-3 bg-light">
@@ -61,10 +60,23 @@
                         </div>
                     </div>
                     <!-- Add announcement button and input -->
-                    <div class="d-flex align-items-center justify-content-center bg-light p-3" style="margin-bottom:20px ;"> <!-- This div will be at the bottom of the flex container -->
-                        <input type="text" class="form-control mr-3" placeholder="Enter announcement text here">
-                        <button class="btn btn-primary" style="margin-left: 10px; color: white; background-color: rgb(22, 45, 255);">></button>
-                    </div>
+                    <form action="", method="post">
+                        <div class="d-flex flex-column align-items-center justify-content-center bg-light p-3" style="margin-bottom: 20px;">
+                            <!-- This div will be at the bottom of the flex container -->
+                            
+                            <div class="d-flex align-items-center mb-2">
+                                <input type="text" class="form-control " style="width: 900px; margin-right: 41px; "  placeholder="Enter announcement title">
+                                
+                            </div>
+                            
+                            <div class="d-flex align-items-center mb-2 ">
+                                <input type="text" class="form-control" style="width: 900px;" placeholder="Enter another announcement text">
+                                <button class="btn btn-primary" style="margin-left: 10px;">></button>
+                                <!-- Add any additional elements here -->
+                            </div>
+                        </div>
+                    </form>
+                    
                 </div>
             </div>
         </div>

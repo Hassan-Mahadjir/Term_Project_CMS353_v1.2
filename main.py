@@ -45,20 +45,10 @@ with app.app_context():
 def admin_only(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
-        # If id is not 1 then return abort with 403 error
-        if current_user.ad_id != 1:
-            return abort(403)
-        # Otherwise continue with the route function
-        return f(*args, **kwargs)
+        # Check if the current user is an admin
+        if not current_user.is_authenticated or current_user.user_type != 'admin':
+            abort(403)  # Return a 403 Forbidden response if not an admin
 
-    return decorated_function
-
-def instructor_only(f):
-    @wraps(f)
-    def decorated_function(*args, **kwargs):
-        # If id is not 1 then return abort with 403 error
-        if current_user.user_type == 'instructor':
-            return abort(403)
         # Otherwise continue with the route function
         return f(*args, **kwargs)
 
@@ -72,8 +62,8 @@ def home():
 def home_student():
     return render_template("student_page.html")
 
-@app.route('/register', methods=['POST', 'GET'])
 @admin_only
+@app.route('/register', methods=['POST', 'GET'])
 def register():
     if request.method == "POST":
         name=request.form['firstName']+" "+request.form['lastName']
@@ -201,6 +191,23 @@ def edit(type,id,name,email):
 @app.route('/group')
 def group():
     return redirect(url_for('home'))
+
+@app.route('/CreateGroup', methods=['POST', 'GET'])
+def create_group():
+    if request.method == "POST":
+        group_name = request.form['groupname']
+        channel_name = request.form['addchannel']
+        group = Group(grp_name=group_name, instructor_id=current_user.inst_id)
+        channel = Channel(ch_name=channel_name, group_id=group.grp_id)
+        db.session.add(group)
+        db.session.add(channel)
+
+        db.session.commit()
+
+        return render_template('instructor_page.html')
+
+    return render_template('create_group_instructor.html')
+
 
 if __name__ == '__main__':
     app.run(debug=True)
