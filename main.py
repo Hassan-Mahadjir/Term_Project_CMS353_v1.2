@@ -1,8 +1,9 @@
 from flask import Flask, render_template, request, redirect, url_for, abort
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import Column, Integer, String
-from database import *
-from flask_login import login_user, LoginManager, current_user, logout_user
+from datetime import datetime
+# from database import *
+from flask_login import login_user, LoginManager, current_user, logout_user, UserMixin
 from functools import wraps
 
 
@@ -15,26 +16,92 @@ app.config['SECRET_KEY'] = '8BYkEfBA6O6donzWlSihBXox7C0sKR6b'
 db = SQLAlchemy()
 db.init_app(app)
 
+student_instructor=db.Table('student_instructor',db.Column('std_id',db.Integer,db.ForeignKey('student.std_id')),
+                         db.Column('inst_id',db.Integer,db.ForeignKey('instructor.inst_id'))
+                         )
+classes=db.Table('classes',db.Column('grp_id',db.Integer,db.ForeignKey('group.grp_id')),
+                         db.Column('std_id',db.Integer,db.ForeignKey('student.std_id'))
+                         )
+chat=db.Table('chat',db.Column('ann_id',db.Integer,db.ForeignKey('announcement.ann_id')),
+                         db.Column('std_id',db.Integer,db.ForeignKey('student.std_id'))
+                         )
+
+
+class Admin(UserMixin, db.Model):
+    ad_id = db.Column(db.Integer, primary_key=True)
+    ad_name = db.Column(db.String(50), nullable=False)
+    ad_email = db.Column(db.String(), nullable=False)
+    ad_password = db.Column(db.String(), nullable=False)
+    type=db.Column(db.String(30),default='admin')
+
+    instructors = db.relationship('Instructor', backref='Admin')
+
+    def get_id(self):
+           return (self.ad_id)
+    
+
+class Instructor(UserMixin, db.Model):
+    inst_id = db.Column(db.Integer, primary_key=True)
+    inst_name = db.Column(db.String(50), nullable=False)
+    inst_email = db.Column(db.String(), nullable=False)
+    inst_password = db.Column(db.String(), nullable=False)
+    admin_id = db.Column(db.Integer, db.ForeignKey('admin.ad_id'))
+    type=db.Column(db.String(30),default='instructor')
+
+    groups = db.relationship('Group', backref='Instructor')
+    announcements = db.relationship('Announcement', backref='Instructor')
+
+    def get_id(self):
+        return (self.inst_id)
+
+
+class Student(UserMixin, db.Model):
+    std_id = db.Column(db.Integer, primary_key=True)
+    std_name = db.Column(db.String(50), nullable=False)
+    std_email = db.Column(db.String(), nullable=False)
+    std_password = db.Column(db.String(), nullable=False)
+    type=db.Column(db.String(30),default='student')
+    teaching=db.relationship('Instructor',secondary=student_instructor, backref='teachers')
+
+    def get_id(self):
+        return (self.std_id)
+
+
+
+class Group(db.Model):
+    grp_id = db.Column(db.Integer, primary_key=True)
+    grp_name = db.Column(db.String(50), nullable=False)
+    instructor_id = db.Column(db.Integer, db.ForeignKey('instructor.inst_id'))
+    grouping=db.relationship('Student',secondary=classes, backref='groupers')
+
+
+class Channel(db.Model):
+    ch_id = db.Column(db.Integer, primary_key=True)
+    ch_name = db.Column(db.String(50), nullable=False)
+    group_id = db.Column(db.Integer, db.ForeignKey('group.grp_id'))
+
+class Announcement(db.Model):
+    ann_id = db.Column(db.Integer, primary_key=True)
+    ann_title = db.Column(db.String(50), nullable=False)
+    ann_body= db.Column(db.String(), nullable=False)
+    ann_date=db.Column(db.Date,default=datetime.now().date())
+    instructor_id = db.Column(db.Integer, db.ForeignKey('instructor.inst_id'))
+    chatting=db.relationship('Student',secondary=chat, backref='chatters')
+
 # Configure Flask-Login
 login_manager = LoginManager()
 login_manager.init_app(app)
 
 @login_manager.user_loader
 def load_user(user_id):
-
-    student = db.session.query(Student).get(user_id)
-    if student:
-        return Student(user_type='student', user_object=student)
+    # Try to load user from each class
+    user = Admin.query.get(user_id)
+    if user is None:
+        user = Instructor.query.get(user_id)
+        if user is None:
+            user = Student.query.get(user_id)
     
-    instructor = db.session.query(Instructor).get(user_id)
-    if instructor:
-        return Instructor(user_type='instructor', user_object=instructor)
-    
-    admin = db.session.query(Admin).get(user_id)
-    if admin:
-        return Admin(user_type='admin', user_object=admin)
-    
-    return None
+    return user
 
 
 

@@ -33,9 +33,6 @@ class Admin(UserMixin, db.Model):
     def get_id(self):
            return (self.ad_id)
     
-    def __init__(self, user_type, user_object):
-        self.user_type = user_type
-        self.user_object = user_object
 
 class Instructor(UserMixin, db.Model):
     inst_id = db.Column(db.Integer, primary_key=True)
@@ -44,12 +41,6 @@ class Instructor(UserMixin, db.Model):
     inst_password = db.Column(db.String(), nullable=False)
     admin_id = db.Column(db.Integer, db.ForeignKey('admin.ad_id'))
     type=db.Column(db.String(30),default='instructor')
-
-
-    def __init__(self, user_type, user_object):
-        self.user_type = user_type
-        self.user_object = user_object
-
 
     groups = db.relationship('Group', backref='Instructor')
     announcements = db.relationship('Announcement', backref='Instructor')
@@ -65,13 +56,6 @@ class Student(UserMixin, db.Model):
     std_password = db.Column(db.String(), nullable=False)
     type=db.Column(db.String(30),default='student')
     teaching=db.relationship('Instructor',secondary=student_instructor, backref='teachers')
-
-
-    def __init__(self, user_type, user_object):
-        self.user_type = user_type
-        self.user_object = user_object
-    
-
 
     def get_id(self):
         return (self.std_id)
