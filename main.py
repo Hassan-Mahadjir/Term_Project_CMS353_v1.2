@@ -99,7 +99,9 @@ def load_user(user_id):
     if user is None:
         user = Instructor.query.get(user_id)
         if user is None:
+            
             user = Student.query.get(user_id)
+            print('Student singed in')
     
     return user
 
@@ -162,9 +164,9 @@ def signin():
         email = request.form['email']
         password = request.form['password']
         user_type = request.form['user_type']
-
+        print(user_type)
         if user_type == 'Admin':
-
+            
             admin = db.session.execute(db.select(Admin).where(Admin.ad_id == 1)).scalar()
 
             if email == admin.ad_email and password == admin.ad_password:
@@ -181,7 +183,7 @@ def signin():
 
                 login_user(instructor)
 
-                return render_template('instructor_page.html')
+                return redirect(url_for('instructor_group'))
             else:
                 return redirect(url_for("signin"))
             
@@ -255,26 +257,40 @@ def edit(type,id,name,email):
 
     
 
-@app.route('/group')
-def group():
-    return redirect(url_for('home'))
+@app.route('/group/<group_id>')
+def group(group_id):
+    channels = db.session.execute(db.select(Channel).where(Channel.group_id == group_id)).scalars().all()
+    print(channels)
+    return render_template('instructor_group_page.html', channels=channels)
 
 @app.route('/CreateGroup', methods=['POST', 'GET'])
 def create_group():
     if request.method == "POST":
-        group_name = request.form['groupname']
-        channel_name = request.form['addchannel']
+        print(current_user)
+        group_name = request.form['groupName']
+        channle_name= request.form["channleName"].lower()
+
         group = Group(grp_name=group_name, instructor_id=current_user.inst_id)
-        channel = Channel(ch_name=channel_name, group_id=group.grp_id)
         db.session.add(group)
-        db.session.add(channel)
-
         db.session.commit()
+        # channel = Channel(ch_name=channle_name, group_id=group.grp_id)
+        
+        # db.session.add(channel)
 
-        return render_template('instructor_page.html')
+        
+
+        return redirect(url_for('instructor_group'))
 
     return render_template('create_group_instructor.html')
 
+@app.route('/insturctorMain')
+def instructor_group():
+    groups = db.session.execute(db.select(Group).where(Group.instructor_id == current_user.inst_id)).scalars().all()
+    return render_template('instructor_page.html',groups = groups)
+
+@app.route('/insturctorMain')
+def load_annoucement():
+    return redirect(url_for('instructor_group'))
 
 if __name__ == '__main__':
     app.run(debug=True)

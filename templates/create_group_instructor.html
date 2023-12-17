@@ -36,23 +36,25 @@
 
         <form class="needs-validation" novalidate="" method="post">
           <div class="row g-3">
-            <div class="col-sm-12">
-              <label for="groupname" class="form-label">Group Name</label>
-              <input type="text" name="groupname" class="form-control" id="groupname" placeholder="" value="" required="">
+            <div class="col-sm-6">
+              <label for="groupName" class="form-label">Group Name</label>
+              <input name="groupName" type="text" class="form-control" id="groupName"  placeholder="" value="" required="">
               <div class="invalid-feedback">
-                Valid first name is required.
+                Valid group name is required.
               </div>
-              
             </div>
 
-            <div class="col-sm-12">
-              <label for="addchannel" class="form-label">Channel  Name</label>
-              <input type="addchannel" class="form-control" id="addchannel" placeholder="" value="" required="">
+            <div class="col-sm-6">
+              <label for="channleName" class="form-label">Channel Name</label>
+              <input name="channleName" type="text" class="form-control" id="channleName" placeholder="" value="" required="">
+              <div class="invalid-feedback">
+                Valid channle name is required.
+              </div>
             </div>
 
             <div class="text-center">
-              <button class="w-50 btn btn-primary btn-lg mt-2 text-center" style="background-image: linear-gradient(rgb(0, 1, 70), rgb(0, 51, 145)); border-color: white;" type="submit">Submit</button>
-          </div>
+              <button class="w-50 btn btn-primary btn-lg mt-2 text-center" style="background-image: linear-gradient(rgb(0, 1, 70), rgb(0, 51, 145)); border-color: white;" type="submit">Register</button>
+            </div>
         </form>
 
       </div>
