@@ -47,6 +47,7 @@
       <div class="album py-5 bg-light">
         <div class="container">
           <div class="row row-cols-1 row-cols-sm-2 row-cols-md-4 g-3">
+            {% for group in student_groups%}
             <!-- This part for the groups -->
             <div class="col">
               <a href="#" style="text-decoration: none">
@@ -62,13 +63,14 @@
                   </div>
                   <div class="card-body">
                     <p class="card-text" , style="text-align: center">
-                      CMSE 353
+                      {{group.grp_name}}
                     </p>
                   </div>
                 </div>
               </a>
             </div>
             <!-- The end parts for groups -->
+            {%endfor%}
           </div>
         </div>
       </div>

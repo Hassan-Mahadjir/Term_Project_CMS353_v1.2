@@ -30,9 +30,9 @@
   </header>
 
     <div class=" container col-lg-8 ">
-          <form action="">
+          <form action="" method="post">
             <label for="search" class="mx-3"><strong>Search by ID:</strong></label>
-            <input type="text" class="col-9" style="height: 4vh;">
+            <input name="search" type="text" class="col-9" style="height: 4vh;">
             <button class="btn btn-primary" style="color: white; background-color: rgb(22, 45, 255);">ADD</button>
           </form>
           <hr>
@@ -56,25 +56,27 @@
             </div>
     
             <!-- create list of user -->
+            {% for student in students_in_group%}
             <div class="d-flex text-muted pt-3 ">
         
               <div class="pb-3 mb-0 small lh-sm border-bottom w-100 row">
                 <div class="d-flex justify-content-between col">
-                  <strong class="text-gray-dark">Hassan Mahamat</strong>
+                  <strong class="text-gray-dark">{{student.std_name}}</strong>
                 </div>
     
                 <div class="d-flex justify-content-between col">
-                    <strong class="text-gray-dark">2090276387</strong>
+                    <strong class="text-gray-dark">{{student.std_id}}</strong>
                 </div>
 
                 <div class="d-flex justify-content-between col">
-                  <strong class="text-gray-dark">www.Wagjashi@gmail.com</strong>
+                  <strong class="text-gray-dark">{{student.std_email}}</strong>
               </div>
   
     
               </div>
     
             </div>
+            {%endfor%}
             <!-- end of -->
             
           </div>

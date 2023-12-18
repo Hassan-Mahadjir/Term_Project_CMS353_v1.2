@@ -10,7 +10,7 @@ from functools import wraps
 
 
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///SystemDataBase.db'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///SystemDataBase1.db'
 app.config['SECRET_KEY'] = '8BYkEfBA6O6donzWlSihBXox7C0sKR6b'
 
 db = SQLAlchemy()
@@ -79,6 +79,7 @@ class Channel(db.Model):
     ch_id = db.Column(db.Integer, primary_key=True)
     ch_name = db.Column(db.String(50), nullable=False)
     group_id = db.Column(db.Integer, db.ForeignKey('group.grp_id'))
+    announcement = db.relationship('Announcement', backref='Channel')
 
 class Announcement(db.Model):
     ann_id = db.Column(db.Integer, primary_key=True)
@@ -86,6 +87,7 @@ class Announcement(db.Model):
     ann_body= db.Column(db.String(), nullable=False)
     ann_date=db.Column(db.Date,default=datetime.now().date())
     instructor_id = db.Column(db.Integer, db.ForeignKey('instructor.inst_id'))
+    channel_id = db.Column(db.Integer, db.ForeignKey('channel.ch_id'))
     chatting=db.relationship('Student',secondary=chat, backref='chatters')
 
 # Configure Flask-Login
@@ -127,9 +129,6 @@ def admin_only(f):
 def home():
     return redirect(url_for('signin'))
 
-@app.route('/home_student')
-def home_student():
-    return render_template("student_page.html")
 
 @admin_only
 @app.route('/register', methods=['POST', 'GET'])
@@ -194,7 +193,7 @@ def signin():
 
                 login_user(student)
 
-                return render_template('student_mainpage.html')
+                return redirect(url_for('home_student'))
             else:
                 return redirect(url_for("signin"))
         
@@ -260,7 +259,6 @@ def edit(type,id,name,email):
 @app.route('/group/<group_id>')
 def group(group_id):
     channels = db.session.execute(db.select(Channel).where(Channel.group_id == group_id)).scalars().all()
-    print(channels)
     return render_template('instructor_group_page.html', channels=channels, group_id = group_id)
 
 @app.route('/CreateGroup', methods=['POST', 'GET'])
@@ -294,11 +292,20 @@ def instructor_group():
     groups = db.session.execute(db.select(Group).where(Group.instructor_id == current_user.inst_id)).scalars().all()
     return render_template('instructor_page.html',groups = groups)
 
-@app.route('/insturctorMain')
-def load_annoucement():
-    return redirect(url_for('group'))
+@app.route('/annoucemnts/<ch_id><g_id>',methods=['POST','GET'])
+def annoucemnts(ch_id,g_id):
 
-@app.route('/addChannle/<id>', methods = ['POST','GET'])
+    if request.method == 'POST':
+        title = request.form['title']
+        body = request.form['body']
+        announcement = Announcement(ann_body=body, ann_title= title, instructor_id=current_user.inst_id, channel_id=ch_id)
+        db.session.add(announcement)
+        db.session.commit()
+    announcements = db.session.execute(db.select(Announcement).where(Announcement.channel_id == ch_id)).scalars().all()
+    channels = db.session.execute(db.select(Channel).where(Channel.group_id == g_id)).scalars().all()
+    return render_template('instructor_group_page.html', channels=channels, announcements = announcements)
+
+@app.route('/addChannel/<id>', methods = ['POST','GET'])
 def addChannle(id):
     if request.method == 'POST':
         channle_name = request.form['channleName']
@@ -309,6 +316,29 @@ def addChannle(id):
         return redirect(url_for('instructor_group'))
 
     return render_template('add_channel.html')
+
+
+@app.route('/addStudent/<group_id>', methods = ['POST','GET'])
+def add_student(group_id):
+    if request.method == 'POST':
+        student_id = int(request.form['search'])
+        student = db.session.execute(db.select(Student).where(Student.std_id == student_id)).scalar()
+        group = db.session.execute(db.select(Group).where(Group.grp_id == group_id)).scalar()
+
+        student.teaching.append(current_user)
+        group.grouping.append(student)
+        db.session.commit()
+        return redirect(url_for('instructor_group'))
+    teaching_students  = db.session.execute(db.select(Instructor).where(Instructor.inst_id == current_user.inst_id)).scalar()
+    group = db.session.execute(db.select(Group).where(Group.grp_id == group_id)).scalar()
+    students_in_group = teaching_students.teachers
+    return render_template('add_student_instructor.html',students_in_group = students_in_group)
+
+@app.route('//home_student', methods = ['POST','GET'])
+def home_student():
+    student  = db.session.execute(db.select(Student).where(Student.std_id == current_user.std_id)).scalar()
+    student_groups = student.groupers
+    return render_template('student_mainpage.html', student_groups = student_groups)
 
 if __name__ == '__main__':
     app.run(debug=True)

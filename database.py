@@ -5,7 +5,7 @@ from datetime import datetime
 from flask_login import UserMixin
 
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///SystemDataBase.db'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///SystemDataBase1.db'
 
 db = SQLAlchemy()
 db.init_app(app)
@@ -73,6 +73,7 @@ class Channel(db.Model):
     ch_id = db.Column(db.Integer, primary_key=True)
     ch_name = db.Column(db.String(50), nullable=False)
     group_id = db.Column(db.Integer, db.ForeignKey('group.grp_id'))
+    announcement = db.relationship('Announcement', backref='Channel')
 
 class Announcement(db.Model):
     ann_id = db.Column(db.Integer, primary_key=True)
@@ -80,25 +81,15 @@ class Announcement(db.Model):
     ann_body= db.Column(db.String(), nullable=False)
     ann_date=db.Column(db.Date,default=datetime.now().date())
     instructor_id = db.Column(db.Integer, db.ForeignKey('instructor.inst_id'))
+    channel_id = db.Column(db.Integer, db.ForeignKey('channel.ch_id'))
     chatting=db.relationship('Student',secondary=chat, backref='chatters')
     
 
-# with app.app_context():
-#      db.create_all()
+with app.app_context():
+     db.create_all()
 
 with app.app_context():
-    students = db.session.execute(db.select(Student)).scalars().all()
-    # instructors = db.session.execute(db.select(Instructor)).scalars().all()
-    # admin=Admin(ad_id='1',ad_name='Nour',ad_password='barakat',ad_email='nour@gmail.com')
-    # instructor=Instructor(inst_id=1,inst_name='Nada',inst_password='Kollah',inst_email='nada@gmail.com',admin_id=1)
-    # instructor1=Instructor(inst_id=2,inst_name='Alex',inst_password='russian',inst_email='alex@gmail.com',admin_id=1)
-    # instructor2=Instructor(inst_id=3,inst_name='Hadi',inst_password='isik',inst_email='hadi@gmail.com',admin_id=1)
-
-    # student=Student(std_id=1,std_name='Ahmed',std_password='xyz',std_email='ahmed@gmail.com')
-    # student2=Student(std_id=2,std_name='Hassan',std_password='zyx',std_email='hassan@gmail.com')
-    # student3=Student(std_id=3,std_name='Nada',std_password='xzy',std_email='nada@gmail.com')
-    # student4=Student(std_id=5,std_name='Aya',std_password='xzy',std_email='aya@gmail.com')
-
-    # db.session.add_all([admin,instructor,instructor1,instructor2,student,student2,student3,student4])
-    # db.session.commit()
-    # db.session.commit()
+    student  = db.session.execute(db.select(Student).where(Student.std_id == 100)).scalar()
+    instructor  = db.session.execute(db.select(Instructor).where(Instructor.inst_id == 11)).scalar()
+    print(student.groupers)
+    db.session.commit()

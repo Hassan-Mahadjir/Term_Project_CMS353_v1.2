@@ -19,7 +19,7 @@
         <div class="up-header">
             <div class="d-flex flex-column flex-md-row align-items-center ">
                 <nav class="d-inline-flex mt-2 mt-md-0 ms-md-auto">
-                <button type="button" class="btn btn-light mx-3 my-2">Add Student</button>
+                <button type="button" class="btn btn-light mx-3 my-2"><a href="{{url_for('add_student', group_id = group_id)}}" style="color: black; text-decoration: none;">Add Student</a></button>
                 <button type="button" class="btn btn-light mx-3 my-2"><a href="{{url_for('addChannle', id = group_id)}}" style="color: black; text-decoration: none;">Add Channel</a></button>
 
                 </nav>
@@ -42,7 +42,7 @@
                             <h5 class="text-center py-3 ">Channels</h5>
                             <ul class="list-group list-group-flush">
                                 {% for channel in channels%}
-                                <button class="btn btn-primary  mb-2"><a href="{{url_for('load_annoucement')}}" style="color: white; text-decoration: none;">{{channel.ch_name}}</a></button>
+                                <button class="btn btn-primary  mb-2"><a href="{{ url_for('annoucemnts', ch_id = channel.ch_id, g_id = group_id)}}" style="color: white; text-decoration: none;">{{channel.ch_name}}</a></button>
                                 {%endfor%}
                             </ul>
                         </div>
@@ -55,12 +55,16 @@
                     </div>
                     <div class="p-3 flex-grow-1 overflow-auto w-90"> <!-- Added flex-grow-1 overflow-auto to make the chat area fill the remaining space and scrollable -->
                         <!-- Chat bubbles -->
-                        <div class="card mb-3">
-                            <div class="card-body" >
-                                <h5 class="card-title">Announcement 1</h5>
-                                <p class="card-text">announcement text will be add here example text.</p>
+                        {% for announcement in announcements %}
+                            <div class="card mb-3">
+                                <div class="card-body" >
+                                    <h5 class="card-title">{{announcement.ann_title}}</h5>
+                                    <h6 class="card-title">{{announcement.ann_date}}</h6>
+                                    <p class="card-text">{{announcement.ann_body}}</p>
+                                </div>
+                                
                             </div>
-                        </div>
+                        {%endfor%}
                     </div>
                     <!-- Add announcement button and input -->
                     <form action="", method="post">
@@ -68,12 +72,12 @@
                             <!-- This div will be at the bottom of the flex container -->
                             
                             <div class="d-flex align-items-center mb-2">
-                                <input type="text" class="form-control " style="width: 900px; margin-right: 41px; "  placeholder="Enter announcement title">
+                                <input name="title" type="text" class="form-control " style="width: 900px; margin-right: 41px; "  placeholder="Enter announcement title">
                                 
                             </div>
                             
                             <div class="d-flex align-items-center mb-2 ">
-                                <input type="text" class="form-control" style="width: 900px;" placeholder="Enter another announcement text">
+                                <input name="body" type="text" class="form-control" style="width: 900px;" placeholder="Enter another announcement text">
                                 <button class="btn btn-primary" style="margin-left: 10px;">></button>
                                 <!-- Add any additional elements here -->
                             </div>
