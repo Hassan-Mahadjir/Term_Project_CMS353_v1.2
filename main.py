@@ -358,9 +358,13 @@ def studentAnnouncements(group_id, ch_id):
     if request.method == 'POST':
         title = request.form['title']
         body = request.form['body']
-        announcement = Announcement(ann_body=body, ann_title= title, instructor_id=current_user.std_id, channel_id=ch_id)
+        group = db.session.execute(db.select(Group).where(Group.grp_id == group_id)).scalar()
+        announcement = Announcement(ann_body=body, ann_title= title, instructor_id=group.instructor_id, channel_id=ch_id)
+        student = db.session.execute(db.select(Student).where(Student.std_id == current_user.std_id)).scalar()
         db.session.add(announcement)
+        announcement.chatting.append(student)
         db.session.commit()
+        
     announcements = db.session.execute(db.select(Announcement).where(Announcement.channel_id == ch_id)).scalars().all()
     channels = db.session.execute(db.select(Channel).where(Channel.group_id == group_id)).scalars().all()
     return render_template('group_page.html', channels = channels, announcements = announcements)
