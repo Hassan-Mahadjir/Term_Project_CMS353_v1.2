@@ -89,7 +89,9 @@ with app.app_context():
      db.create_all()
 
 with app.app_context():
-    student  = db.session.execute(db.select(Student).where(Student.std_id == 100)).scalar()
-    instructor  = db.session.execute(db.select(Instructor).where(Instructor.inst_id == 11)).scalar()
-    print(student.groupers)
+    student = db.session.execute(db.select(Student).where(Student.std_id == 100)).scalar()
+    chat = student.chatters
+
+    print(chat)
+
     db.session.commit()

@@ -39,25 +39,33 @@
                         <div class="row align-items-center">
                             <h5 class="text-center py-3 ">Channels</h5>
                             <ul class="list-group list-group-flush">
-                                <button class="btn btn-primary  mb-2">General</button>
-                                <button class="btn btn-primary  mb-2">Lab</button>
+                                {%for channel in channels%}
+                                <button class="btn btn-primary  mb-2"><a href="{{url_for('studentAnnouncements', ch_id = channel.ch_id, group_id = channel.group_id)}}" style="color: white; text-decoration: none;">{{channel.ch_name}}</a></button>
+                                {%endfor%}
                             </ul>
                         </div>
                     </div>
                     <a class="nav-link" href="{{url_for('logout')}}"></a><button class="btn btn-outline-success rounded-pill px-3 w-20 btn-sm" style="position: fixed; bottom: 20px; color: red; border-color: red;">Log out</button></a>
                 </div>
-                <div class="col-9 d-flex flex-column " style="height: 95vh; padding: 0;"> <!-- Added padding: 0; to remove the space between the right side and the left side and the window -->
+                <div class="col-9 d-flex flex-column " style="height: 95vh; padding: 0;">
+                     <!-- Added padding: 0; to remove the space between the right side and the left side and the window -->
+                     
                     <div class="d-flex align-items-center justify-content-between  p-3 bg-light">
                         <h4 class="text-black">General</h4>
                     </div>
                     <div class="p-3 flex-grow-1 overflow-auto w-90"> <!-- Added flex-grow-1 overflow-auto to make the chat area fill the remaining space and scrollable -->
+                        
                         <!-- Chat bubbles -->
+                        {% for announcement in announcements%}
                         <div class="card mb-3">
                             <div class="card-body" >
-                                <h5 class="card-title">Announcement 1</h5>
-                                <p class="card-text">announcement text will be add here example text.</p>
+                                <h5 class="card-title">{{announcement.ann_title}}</h5>
+                                <h6 class="card-title">{{announcement.ann_date}}</h6>
+
+                                <p class="card-text">{{announcement.ann_body}}</p>
                             </div>
                         </div>
+                        {%endfor%}
                     </div>
                     <!-- Add announcement button and input -->
                     <form action="", method="post">
