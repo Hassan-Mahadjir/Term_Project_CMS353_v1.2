@@ -1,4 +1,4 @@
-   # admin=Admin(ad_id='1',ad_name='Nour',ad_password='barakat',ad_email='nour@gmail.com')
+# admin=Admin(ad_id='1',ad_name='Nour',ad_password='barakat',ad_email='nour@gmail.com')
 # instructor=Instructor(inst_id=1,inst_name='Nada',inst_password='Kollah',inst_email='nada@gmail.com',admin_id=1)
 # instructor1=Instructor(inst_id=2,inst_name='Alex',inst_password='russian',inst_email='alex@gmail.com',admin_id=1)
 # instructor2=Instructor(inst_id=3,inst_name='Hadi',inst_password='isik',inst_email='hadi@gmail.com',admin_id=1)

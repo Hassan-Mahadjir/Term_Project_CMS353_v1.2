@@ -39,7 +39,7 @@ def decrypt_string(encrypted_data, key):
     # Remove padding and return decrypted bytes
     decrypted_data = decrypted_data.rstrip(b'\x00')
 
-    return decrypted_data
+    return decrypted_data.decode('utf-8')
 
 # Example usage:
 key = b'\r\x8b\x9e\xb0\x8f\x04S\xff'
@@ -53,7 +53,7 @@ encrypted_data = encrypt_string('hello, this Hassan, yeahhh', key)
 
 
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///SystemDataBase2.db'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///SystemDataBase.db'
 
 db = SQLAlchemy()
 db.init_app(app)
@@ -137,10 +137,19 @@ with app.app_context():
      db.create_all()
 
 with app.app_context():
-    name = encrypt_string('Ahmed', key)
-    password = encrypt_string('xyz', key)
-    email = encrypt_string('ahmed@gmail.com',key)
+    name = encrypt_string('Hassan Mahamat', key)
+    password = encrypt_string('hassan@!7', key)
+    email = encrypt_string('hassan@gmail.com',key)
 
-    student=Student(std_id=110,std_name=name,std_password=password,std_email=email)
-    db.session.add(student)
+    admin=Admin(ad_id='1',ad_name=encrypt_string('Nour', key),ad_password=encrypt_string('barakat', key),ad_email=encrypt_string('nour@gmail.com', key))
+
+    student=Student(std_id=100,std_name=name,std_password=password,std_email=email)
+    instructor=Instructor(inst_id=10,inst_name=encrypt_string('Nada',key),inst_password=encrypt_string('Kollah',key),inst_email=encrypt_string('nada@gmail.com',key),admin_id=1)
+
+    # db.session.add(student)
+    # st = db.session.execute(db.select(Student).where(Student.std_id == 110)).scalar()
+    # print(decrypt_string(st.std_name,key))
+    # db.session.add(instructor)
+    instructor = db.session.execute(db.select(Instructor).where(Instructor.inst_email == b'\xe9\xe7N\x94O\xaa`\xec\x89\xd0\xf2\xae\xed8\xb5\n')).scalar()
+    print(instructor)
     db.session.commit()

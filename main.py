@@ -2,15 +2,51 @@ from flask import Flask, render_template, request, redirect, url_for, abort
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import Column, Integer, String
 from datetime import datetime
-# from database import *
 from flask_login import login_user, LoginManager, current_user, logout_user, UserMixin
 from functools import wraps
 
+from Crypto.Cipher import DES
+from Crypto.Random import get_random_bytes
 
+def pad_data(data):
+    # Pad the data to be a multiple of 8 bytes (DES block size)
+    while len(data) % 8 != 0:
+        data += b'\x00'
+    return data
 
+def generate_key():
+    # Generate a random 8-byte key
+    return get_random_bytes(8)
+
+def encrypt_string(data, key):
+    # Convert string to bytes and pad the data
+    data_bytes = data.encode('utf-8')
+    padded_data = pad_data(data_bytes)
+
+    # Create a DES cipher object with the key and the ECB mode
+    cipher = DES.new(key, DES.MODE_ECB)
+
+    # Encrypt the padded data
+    encrypted_data = cipher.encrypt(padded_data)
+
+    return encrypted_data
+
+def decrypt_string(encrypted_data, key):
+    # Create a DES cipher object with the key and the ECB mode
+    cipher = DES.new(key, DES.MODE_ECB)
+
+    # Decrypt the data
+    decrypted_data = cipher.decrypt(encrypted_data)
+
+    # Remove padding and return decrypted bytes
+    decrypted_data = decrypted_data.rstrip(b'\x00')
+
+    return decrypted_data.decode('utf-8')
+
+key = b'\r\x8b\x9e\xb0\x8f\x04S\xff'
 
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///SystemDataBase1.db'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///SystemDataBase.db'
 app.config['SECRET_KEY'] = '8BYkEfBA6O6donzWlSihBXox7C0sKR6b'
 
 db = SQLAlchemy()
@@ -29,7 +65,7 @@ chat=db.Table('chat',db.Column('ann_id',db.Integer,db.ForeignKey('announcement.a
 
 class Admin(UserMixin, db.Model):
     ad_id = db.Column(db.Integer, primary_key=True)
-    ad_name = db.Column(db.String(50), nullable=False)
+    ad_name = db.Column(db.String(), nullable=False)
     ad_email = db.Column(db.String(), nullable=False)
     ad_password = db.Column(db.String(), nullable=False)
     type=db.Column(db.String(30),default='admin')
@@ -42,7 +78,7 @@ class Admin(UserMixin, db.Model):
 
 class Instructor(UserMixin, db.Model):
     inst_id = db.Column(db.Integer, primary_key=True)
-    inst_name = db.Column(db.String(50), nullable=False)
+    inst_name = db.Column(db.String(), nullable=False)
     inst_email = db.Column(db.String(), nullable=False)
     inst_password = db.Column(db.String(), nullable=False)
     admin_id = db.Column(db.Integer, db.ForeignKey('admin.ad_id'))
@@ -57,7 +93,7 @@ class Instructor(UserMixin, db.Model):
 
 class Student(UserMixin, db.Model):
     std_id = db.Column(db.Integer, primary_key=True)
-    std_name = db.Column(db.String(50), nullable=False)
+    std_name = db.Column(db.String(), nullable=False)
     std_email = db.Column(db.String(), nullable=False)
     std_password = db.Column(db.String(), nullable=False)
     type=db.Column(db.String(30),default='student')
@@ -70,20 +106,20 @@ class Student(UserMixin, db.Model):
 
 class Group(db.Model):
     grp_id = db.Column(db.Integer, primary_key=True)
-    grp_name = db.Column(db.String(50), nullable=False)
+    grp_name = db.Column(db.String(), nullable=False)
     instructor_id = db.Column(db.Integer, db.ForeignKey('instructor.inst_id'))
     grouping=db.relationship('Student',secondary=classes, backref='groupers')
 
 
 class Channel(db.Model):
     ch_id = db.Column(db.Integer, primary_key=True)
-    ch_name = db.Column(db.String(50), nullable=False)
+    ch_name = db.Column(db.String(), nullable=False)
     group_id = db.Column(db.Integer, db.ForeignKey('group.grp_id'))
     announcement = db.relationship('Announcement', backref='Channel')
 
 class Announcement(db.Model):
     ann_id = db.Column(db.Integer, primary_key=True)
-    ann_title = db.Column(db.String(50), nullable=False)
+    ann_title = db.Column(db.String(), nullable=False)
     ann_body= db.Column(db.String(), nullable=False)
     ann_date=db.Column(db.Date,default=datetime.now().date())
     instructor_id = db.Column(db.Integer, db.ForeignKey('instructor.inst_id'))
@@ -140,11 +176,11 @@ def register():
         password= request.form["password"]
         type=request.form['type'].lower()
         if type== 'student':
-            student=Student(std_id=id,std_name=name,std_password=password,std_email=email)
+            student=Student(std_id=id,std_name= encrypt_string(name,key),std_password=encrypt_string(password,key),std_email=encrypt_string(email,key))
             db.session.add(student)
             db.session.commit()
         elif type=='instructor':
-            instructor=Instructor(inst_id=id,inst_name=name,inst_password=password,inst_email=email,admin_id=1)
+            instructor=Instructor(inst_id=id,inst_name=encrypt_string(name,key),inst_password=encrypt_string(password,key),inst_email=encrypt_string(email,key),admin_id=1)
             db.session.add(instructor)
             db.session.commit()
         else:
@@ -168,7 +204,7 @@ def signin():
             
             admin = db.session.execute(db.select(Admin).where(Admin.ad_id == 1)).scalar()
 
-            if email == admin.ad_email and password == admin.ad_password:
+            if email == decrypt_string(admin.ad_email,key) and password == decrypt_string(admin.ad_password,key):
 
                 login_user(admin)
 
@@ -176,9 +212,8 @@ def signin():
             else:
                 return redirect(url_for("signin"))
         elif user_type == 'Instructor':
-            instructor = db.session.execute(db.select(Instructor).where(Instructor.inst_email == email)).scalar()
-
-            if email == instructor.inst_email and password == instructor.inst_password:
+            instructor = db.session.execute(db.select(Instructor).where(Instructor.inst_email == encrypt_string(email,key) )).scalar()
+            if email == decrypt_string(instructor.inst_email,key) and password == decrypt_string(instructor.inst_password,key):
 
                 login_user(instructor)
 
@@ -187,9 +222,9 @@ def signin():
                 return redirect(url_for("signin"))
             
         elif user_type == 'Student':
-            student = db.session.execute(db.select(Student).where(Student.std_email == email)).scalar()
+            student = db.session.execute(db.select(Student).where(Student.std_email == encrypt_string(email,key))).scalar()
 
-            if email == student.std_email and password == student.std_password:
+            if email == decrypt_string(student.std_email,key) and password == decrypt_string(student.std_password,key):
 
                 login_user(student)
 
@@ -208,12 +243,14 @@ def logout():
     print("logout done")
     return redirect(url_for('signin'))
 
+app.jinja_env.filters['decrypt'] = decrypt_string
+
 @app.route('/admin')
 def admin():
     students = db.session.execute(db.select(Student)).scalars().all()
     instructors = db.session.execute(db.select(Instructor)).scalars().all()
 
-    return render_template('admin_page.html', types= [instructors, students])
+    return render_template('admin_page.html', types= [instructors, students], key=key)
 
 @admin_only
 @app.route('/edit/<type>/<int:id>/<name>/<email>', methods=['POST', 'GET'])
@@ -235,7 +272,7 @@ def edit(type,id,name,email):
             instructor_data = db.session.execute(db.select(Instructor).where(Instructor.inst_id == id_)).scalar()
             db.session.delete(instructor_data)
             db.session.commit()
-            new_student=Student(std_name=fullname,std_password='xyz',std_email=email)
+            new_student=Student(std_name=encrypt_string(fullname,key),std_password=encrypt_string('xyz',key),std_email=encrypt_string(email,key))
             db.session.add(new_student)
             db.session.commit()
     
@@ -244,7 +281,7 @@ def edit(type,id,name,email):
             student_data = db.session.execute(db.select(Student).where(Student.std_id == id_)).scalar()
             db.session.delete(student_data)
             db.session.commit()
-            new_instructor=Instructor(inst_name=fullname,inst_password='xyz',inst_email=email,admin_id = 1)
+            new_instructor=Instructor(inst_name=encrypt_string(fullname,key),inst_password=encrypt_string('xyz',key),inst_email=encrypt_string(email,key),admin_id = 1)
             db.session.add(new_instructor)
             db.session.commit()
 
