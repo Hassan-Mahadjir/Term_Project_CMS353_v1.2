@@ -47,7 +47,7 @@ with open('old_key.txt','rb') as file:
     key = file.read()
 
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///SystemDataBase2.db'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///SystemDataBase.db'
 app.config['SECRET_KEY'] = '8BYkEfBA6O6donzWlSihBXox7C0sKR6b'
 
 db = SQLAlchemy()
