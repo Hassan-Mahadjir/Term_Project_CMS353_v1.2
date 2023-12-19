@@ -42,7 +42,7 @@
                             <h5 class="text-center py-3 ">Channels</h5>
                             <ul class="list-group list-group-flush">
                                 {% for channel in channels%}
-                                <button class="btn btn-primary  mb-2"><a href="{{ url_for('annoucemnts', ch_id = channel.ch_id, g_id = group_id)}}" style="color: white; text-decoration: none;">{{channel.ch_name}}</a></button>
+                                <button class="btn btn-primary  mb-2"><a href="{{ url_for('annoucemnts', ch_id = channel.ch_id, g_id = group_id)}}" style="color: white; text-decoration: none;">{{channel.ch_name|decrypt(key)}}</a></button>
                                 {%endfor%}
                             </ul>
                         </div>
@@ -58,9 +58,9 @@
                         {% for announcement in announcements %}
                             <div class="card mb-3">
                                 <div class="card-body" >
-                                    <h5 class="card-title">{{announcement.ann_title}}</h5>
+                                    <h5 class="card-title">{{announcement.ann_title|decrypt(key)}}</h5>
                                     <h6 class="card-title">{{announcement.ann_date}}</h6>
-                                    <p class="card-text">{{announcement.ann_body}}</p>
+                                    <p class="card-text">{{announcement.ann_body|decrypt(key)}}</p>
                                 </div>
                                 
                             </div>

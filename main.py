@@ -126,7 +126,6 @@ class Announcement(db.Model):
     channel_id = db.Column(db.Integer, db.ForeignKey('channel.ch_id'))
     chatting=db.relationship('Student',secondary=chat, backref='chatters')
 
-# Configure Flask-Login
 login_manager = LoginManager()
 login_manager.init_app(app)
 
@@ -296,7 +295,7 @@ def edit(type,id,name,email):
 @app.route('/group/<group_id>')
 def group(group_id):
     channels = db.session.execute(db.select(Channel).where(Channel.group_id == group_id)).scalars().all()
-    return render_template('instructor_group_page.html', channels=channels, group_id = group_id)
+    return render_template('instructor_group_page.html', channels=channels, group_id = group_id, key=key)
 
 @app.route('/CreateGroup', methods=['POST', 'GET'])
 def create_group():
@@ -306,12 +305,12 @@ def create_group():
                 group_name = request.form['groupName']
                 channle_name = request.form["channleName"].lower()
 
-                group = Group(grp_name=group_name, instructor_id=current_user.inst_id)
+                group = Group(grp_name=encrypt_string(group_name,key) , instructor_id=current_user.inst_id)
 
                 db.session.add(group)
                 db.session.commit()
 
-                channle = Channel(ch_name=channle_name, group_id = group.grp_id)
+                channle = Channel(ch_name=encrypt_string(channle_name,key), group_id = group.grp_id)
                 db.session.add(channle)
                 db.session.commit()
 
@@ -327,7 +326,7 @@ def create_group():
 @app.route('/insturctorMain')
 def instructor_group():
     groups = db.session.execute(db.select(Group).where(Group.instructor_id == current_user.inst_id)).scalars().all()
-    return render_template('instructor_page.html',groups = groups)
+    return render_template('instructor_page.html',groups = groups,key=key)
 
 @app.route('/annoucemnts/<ch_id><g_id>',methods=['POST','GET'])
 def annoucemnts(ch_id,g_id):
@@ -335,18 +334,18 @@ def annoucemnts(ch_id,g_id):
     if request.method == 'POST':
         title = request.form['title']
         body = request.form['body']
-        announcement = Announcement(ann_body=body, ann_title= title, instructor_id=current_user.inst_id, channel_id=ch_id)
+        announcement = Announcement(ann_body=encrypt_string(body,key), ann_title= encrypt_string(title,key), instructor_id=current_user.inst_id, channel_id=ch_id)
         db.session.add(announcement)
         db.session.commit()
     announcements = db.session.execute(db.select(Announcement).where(Announcement.channel_id == ch_id)).scalars().all()
     channels = db.session.execute(db.select(Channel).where(Channel.group_id == g_id)).scalars().all()
-    return render_template('instructor_group_page.html', channels=channels, announcements = announcements)
+    return render_template('instructor_group_page.html', channels=channels, announcements = announcements, key=key)
 
 @app.route('/addChannel/<id>', methods = ['POST','GET'])
 def addChannle(id):
     if request.method == 'POST':
         channle_name = request.form['channleName']
-        channle = Channel(ch_name=channle_name, group_id = id)
+        channle = Channel(ch_name=encrypt_string(channle_name,key), group_id = id)
         db.session.add(channle)
         db.session.commit()
 
@@ -376,18 +375,18 @@ def add_student(group_id):
     for student in students_in_group:
         if student.std_id in list_of_student_in_group:
             classes.append(student)
-    return render_template('add_student_instructor.html',students_in_group = classes)
+    return render_template('add_student_instructor.html',students_in_group = classes, key=key)
 
 @app.route('/home_student', methods = ['POST','GET'])
 def home_student():
     student  = db.session.execute(db.select(Student).where(Student.std_id == current_user.std_id)).scalar()
     student_groups = student.groupers
-    return render_template('student_mainpage.html', student_groups = student_groups)
+    return render_template('student_mainpage.html', student_groups = student_groups, key=key)
 
 @app.route('/StudentGroup/<group_id>')
 def studentGroup(group_id):
     channels = db.session.execute(db.select(Channel).where(Channel.group_id == group_id)).scalars().all()
-    return render_template('group_page.html', channels = channels)
+    return render_template('group_page.html', channels = channels, key=key)
 
 @app.route('/StudentAnnouncements/<group_id><ch_id>',methods=['POST','GET'])
 def studentAnnouncements(group_id, ch_id):
@@ -396,7 +395,7 @@ def studentAnnouncements(group_id, ch_id):
         title = request.form['title']
         body = request.form['body']
         group = db.session.execute(db.select(Group).where(Group.grp_id == group_id)).scalar()
-        announcement = Announcement(ann_body=body, ann_title= title, instructor_id=group.instructor_id, channel_id=ch_id)
+        announcement = Announcement(ann_body=encrypt_string(body,key), ann_title= encrypt_string(title,key), instructor_id=group.instructor_id, channel_id=ch_id)
         student = db.session.execute(db.select(Student).where(Student.std_id == current_user.std_id)).scalar()
         db.session.add(announcement)
         announcement.chatting.append(student)
@@ -404,7 +403,7 @@ def studentAnnouncements(group_id, ch_id):
         
     announcements = db.session.execute(db.select(Announcement).where(Announcement.channel_id == ch_id)).scalars().all()
     channels = db.session.execute(db.select(Channel).where(Channel.group_id == group_id)).scalars().all()
-    return render_template('group_page.html', channels = channels, announcements = announcements)
+    return render_template('group_page.html', channels = channels, announcements = announcements, key=key)
 if __name__ == '__main__':
     app.run(debug=True)
 
