@@ -43,10 +43,11 @@ def decrypt_string(encrypted_data, key):
 
     return decrypted_data.decode('utf-8')
 
-key = b'\r\x8b\x9e\xb0\x8f\x04S\xff'
+with open('old_key.txt','rb') as file:
+    key = file.read()
 
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///SystemDataBase.db'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///SystemDataBase2.db'
 app.config['SECRET_KEY'] = '8BYkEfBA6O6donzWlSihBXox7C0sKR6b'
 
 db = SQLAlchemy()
@@ -126,6 +127,47 @@ class Announcement(db.Model):
     channel_id = db.Column(db.Integer, db.ForeignKey('channel.ch_id'))
     chatting=db.relationship('Student',secondary=chat, backref='chatters')
 
+# updating Data Base
+def update_entries_with_new_key(new_key):
+    # Update entries in the Admin table
+    admins = Admin.query.all()
+    for admin in admins:
+        admin.ad_password = encrypt_string(decrypt_string(admin.ad_password, key), new_key)
+        admin.ad_name = encrypt_string(decrypt_string(admin.ad_name, key), new_key)
+        admin.ad_email = encrypt_string(decrypt_string(admin.ad_email, key), new_key)
+
+    # Update entries in the Instructor table
+    instructors = Instructor.query.all()
+    for instructor in instructors:
+        instructor.inst_password = encrypt_string(decrypt_string(instructor.inst_password, key), new_key)
+        instructor.inst_email = encrypt_string(decrypt_string(instructor.inst_email, key), new_key)
+        instructor.inst_name = encrypt_string(decrypt_string(instructor.inst_name, key), new_key)
+
+    # Update entries in the Student table
+    students = Student.query.all()
+    for student in students:
+        student.std_password = encrypt_string(decrypt_string(student.std_password, key), new_key)
+        student.std_name = encrypt_string(decrypt_string(student.std_name, key), new_key)
+        student.std_email = encrypt_string(decrypt_string(student.std_email, key), new_key)
+
+    # Update entries in the Announcement table
+    announcements = Announcement.query.all()
+    for announcement in announcements:
+        announcement.ann_title = encrypt_string(decrypt_string(announcement.ann_title, key), new_key)
+        announcement.ann_body = encrypt_string(decrypt_string(announcement.ann_body, key), new_key)
+
+    # Update entries in the Group table
+    groups = Group.query.all()
+    for group in groups:
+        group.grp_name = encrypt_string(decrypt_string(group.grp_name, key), new_key)
+
+    # Update entries in the Channel table
+    channels = Channel.query.all()
+    for channel in channels:
+        channel.ch_name = encrypt_string(decrypt_string(channel.ch_name, key), new_key)
+
+    # Commit the changes to the database
+    db.session.commit()
 login_manager = LoginManager()
 login_manager.init_app(app)
 
@@ -405,6 +447,15 @@ def studentAnnouncements(group_id, ch_id):
     channels = db.session.execute(db.select(Channel).where(Channel.group_id == group_id)).scalars().all()
     return render_template('group_page.html', channels = channels, announcements = announcements, key=key)
 if __name__ == '__main__':
+    today = datetime.now().weekday()
+    if today == 0:
+        with app.app_context():
+            new_key = generate_key()
+            with open('old_key.txt','wb') as file:
+                file.write(new_key)
+            update_entries_with_new_key(new_key)
+
+            
     app.run(debug=True)
 
 

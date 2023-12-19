@@ -42,8 +42,9 @@ def decrypt_string(encrypted_data, key):
     return decrypted_data.decode('utf-8')
 
 # Example usage:
-key = b'\r\x8b\x9e\xb0\x8f\x04S\xff'
-# print(f"KEY: {key}")
+key = b'<s\xb8\x04*\xc0I\xd6'
+new_key = b'<s\xb8\x03*\xc0I\xe6'
+# print(f"KEY: {new_key}")
 
 encrypted_data = encrypt_string('hello, this Hassan, yeahhh', key)
 # print("Encrypted data:", encrypted_data)
@@ -53,7 +54,7 @@ encrypted_data = encrypt_string('hello, this Hassan, yeahhh', key)
 
 
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///SystemDataBase.db'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///SystemDataBase2.db'
 
 db = SQLAlchemy()
 db.init_app(app)
@@ -136,20 +137,63 @@ class Announcement(db.Model):
 with app.app_context():
      db.create_all()
 
+def update_entries_with_new_key(new_key):
+    # Update entries in the Admin table
+    admins = Admin.query.all()
+    for admin in admins:
+        admin.ad_password = encrypt_string(decrypt_string(admin.ad_password, key), new_key)
+        admin.ad_name = encrypt_string(decrypt_string(admin.ad_name, key), new_key)
+        admin.ad_email = encrypt_string(decrypt_string(admin.ad_email, key), new_key)
+
+    # Update entries in the Instructor table
+    instructors = Instructor.query.all()
+    for instructor in instructors:
+        instructor.inst_password = encrypt_string(decrypt_string(instructor.inst_password, key), new_key)
+        instructor.inst_email = encrypt_string(decrypt_string(instructor.inst_email, key), new_key)
+        instructor.inst_name = encrypt_string(decrypt_string(instructor.inst_name, key), new_key)
+
+    # Update entries in the Student table
+    students = Student.query.all()
+    for student in students:
+        student.std_password = encrypt_string(decrypt_string(student.std_password, key), new_key)
+        student.std_name = encrypt_string(decrypt_string(student.std_name, key), new_key)
+        student.std_email = encrypt_string(decrypt_string(student.std_email, key), new_key)
+
+    # Update entries in the Announcement table
+    announcements = Announcement.query.all()
+    for announcement in announcements:
+        announcement.ann_title = encrypt_string(decrypt_string(announcement.ann_title, key), new_key)
+        announcement.ann_body = encrypt_string(decrypt_string(announcement.ann_body, key), new_key)
+
+    # Update entries in the Group table
+    groups = Group.query.all()
+    for group in groups:
+        group.grp_name = encrypt_string(decrypt_string(group.grp_name, key), new_key)
+
+    # Update entries in the Channel table
+    channels = Channel.query.all()
+    for channel in channels:
+        channel.ch_name = encrypt_string(decrypt_string(channel.ch_name, key), new_key)
+
+    # Commit the changes to the database
+    db.session.commit()
+
 with app.app_context():
     name = encrypt_string('Hassan Mahamat', key)
     password = encrypt_string('hassan@!7', key)
     email = encrypt_string('hassan@gmail.com',key)
 
-    admin=Admin(ad_id='1',ad_name=encrypt_string('Nour', key),ad_password=encrypt_string('barakat', key),ad_email=encrypt_string('nour@gmail.com', key))
+    # admin=Admin(ad_id='1',ad_name=encrypt_string('Nour', key),ad_password=encrypt_string('barakat', key),ad_email=encrypt_string('nour@gmail.com', key))
 
-    student=Student(std_id=100,std_name=name,std_password=password,std_email=email)
-    instructor=Instructor(inst_id=10,inst_name=encrypt_string('Nada',key),inst_password=encrypt_string('Kollah',key),inst_email=encrypt_string('nada@gmail.com',key),admin_id=1)
+    # student=Student(std_id=100,std_name=name,std_password=password,std_email=email)
+    # instructor=Instructor(inst_id=10,inst_name=encrypt_string('Nada',key),inst_password=encrypt_string('Kollah',key),inst_email=encrypt_string('nada@gmail.com',key),admin_id=1)
 
-    # db.session.add(student)
-    # st = db.session.execute(db.select(Student).where(Student.std_id == 110)).scalar()
-    # print(decrypt_string(st.std_name,key))
-    # db.session.add(instructor)
-    instructor = db.session.execute(db.select(Instructor).where(Instructor.inst_email == b'\xe9\xe7N\x94O\xaa`\xec\x89\xd0\xf2\xae\xed8\xb5\n')).scalar()
-    print(instructor)
+    # # db.session.add(student)
+    # # st = db.session.execute(db.select(Student).where(Student.std_id == 110)).scalar()
+    # # print(decrypt_string(st.std_name,key))
+    # # db.session.add(instructor)
+    # instructor = db.session.execute(db.select(Instructor).where(Instructor.inst_email == b'\xe9\xe7N\x94O\xaa`\xec\x89\xd0\xf2\xae\xed8\xb5\n')).scalar()
+    # print(instructor)
+
+    update_entries_with_new_key(new_key=new_key)
     db.session.commit()
