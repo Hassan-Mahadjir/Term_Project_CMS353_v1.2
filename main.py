@@ -311,20 +311,36 @@ def edit(type,id,name,email):
 
         if updated_type == 'Student' and type == 'instructor':
             instructor_data = db.session.execute(db.select(Instructor).where(Instructor.inst_id == id_)).scalar()
-            db.session.delete(instructor_data)
-            db.session.commit()
-            new_student=Student(std_name=encrypt_string(fullname,key),std_password=encrypt_string('xyz',key),std_email=encrypt_string(email,key))
-            db.session.add(new_student)
-            db.session.commit()
+            if instructor_data:
+                instructor_data.announcements = []
+                instructor_data.teachers = []
+                instructor_data.groups = []
+                db.session.delete(instructor_data)
+                db.session.commit()
+
+                new_student=Student(std_name=encrypt_string(fullname,key),std_password=encrypt_string('xyz',key),std_email=encrypt_string(email,key))
+                for announcement in instructor_data.announcements:
+                    new_student.chatters.append(announcement)
+                db.session.add(new_student)
+                db.session.commit()
     
         elif updated_type == 'Instructor' and type == 'student':
 
             student_data = db.session.execute(db.select(Student).where(Student.std_id == id_)).scalar()
-            db.session.delete(student_data)
-            db.session.commit()
-            new_instructor=Instructor(inst_name=encrypt_string(fullname,key),inst_password=encrypt_string('xyz',key),inst_email=encrypt_string(email,key),admin_id = 1)
-            db.session.add(new_instructor)
-            db.session.commit()
+            if student_data:
+                print(student_data.teaching)
+                student_data.teaching = []
+                student_data.grouping = []
+                student_data.chatters = []
+                db.session.delete(student_data)
+                db.session.commit()
+
+                new_instructor=Instructor(inst_name=encrypt_string(fullname,key),inst_password=encrypt_string('xyz',key),inst_email=encrypt_string(email,key),admin_id = 1)
+                for announcement in student_data.chatters:
+                    new_instructor.announcements.append(announcement)
+
+                db.session.add(new_instructor)
+                db.session.commit()
 
 
         return redirect(url_for('admin'))
@@ -337,7 +353,11 @@ def edit(type,id,name,email):
 @app.route('/group/<group_id>')
 def group(group_id):
     channels = db.session.execute(db.select(Channel).where(Channel.group_id == group_id)).scalars().all()
-    return render_template('instructor_group_page.html', channels=channels, group_id = group_id, key=key)
+    group = db.session.execute(db.select(Group).where(Group.grp_id == group_id)).scalar()
+    for channel in channels:
+        current_ch_name = channel.ch_name
+        break
+    return render_template('instructor_group_page.html', channels=channels,group_id=group_id, key=key, group = group.grp_name, current_ch_name=current_ch_name)
 
 @app.route('/CreateGroup', methods=['POST', 'GET'])
 def create_group():
@@ -381,7 +401,12 @@ def annoucemnts(ch_id,g_id):
         db.session.commit()
     announcements = db.session.execute(db.select(Announcement).where(Announcement.channel_id == ch_id)).scalars().all()
     channels = db.session.execute(db.select(Channel).where(Channel.group_id == g_id)).scalars().all()
-    return render_template('instructor_group_page.html', channels=channels, announcements = announcements, key=key)
+    group = db.session.execute(db.select(Group).where(Group.grp_id == g_id)).scalar()
+    for channel in channels:
+        if int(channel.ch_id) == int(ch_id):
+            current_ch_name = channel.ch_name
+            break
+    return render_template('instructor_group_page.html', channels=channels,group_id=g_id, announcements = announcements, key=key, current_ch_name=current_ch_name, group = group.grp_name)
 
 @app.route('/addChannel/<id>', methods = ['POST','GET'])
 def addChannle(id):
@@ -428,7 +453,11 @@ def home_student():
 @app.route('/StudentGroup/<group_id>')
 def studentGroup(group_id):
     channels = db.session.execute(db.select(Channel).where(Channel.group_id == group_id)).scalars().all()
-    return render_template('group_page.html', channels = channels, key=key)
+    group = db.session.execute(db.select(Group).where(Group.grp_id == group_id)).scalar()
+    for channel in channels:
+        current_ch_name = channel.ch_name
+        break
+    return render_template('group_page.html', channels = channels, key=key, group = group.grp_name, current_ch_name=current_ch_name)
 
 @app.route('/StudentAnnouncements/<group_id><ch_id>',methods=['POST','GET'])
 def studentAnnouncements(group_id, ch_id):
@@ -445,7 +474,13 @@ def studentAnnouncements(group_id, ch_id):
         
     announcements = db.session.execute(db.select(Announcement).where(Announcement.channel_id == ch_id)).scalars().all()
     channels = db.session.execute(db.select(Channel).where(Channel.group_id == group_id)).scalars().all()
-    return render_template('group_page.html', channels = channels, announcements = announcements, key=key)
+    group = db.session.execute(db.select(Group).where(Group.grp_id == group_id)).scalar()
+    for channel in channels:
+        if int(channel.ch_id) == int(ch_id):
+            current_ch_name = channel.ch_name
+            break
+    return render_template('group_page.html', channels = channels, announcements = announcements, key=key, current_ch_name=current_ch_name, group = group.grp_name)
+
 if __name__ == '__main__':
     today = datetime.now().weekday()
     if today == 0:
